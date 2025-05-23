@@ -2,6 +2,7 @@
 
 import os
 import threading
+import re
 from tkinter import *
 from tkinter import filedialog, messagebox
 from pytubefix import YouTube, Playlist
@@ -9,7 +10,6 @@ from pytubefix.cli import on_progress
 import subprocess
 
 def sanitize_filename(name):
-    import re
     return re.sub(r'[\\/*?:"<>|]', "", name)
 
 def download_mp4(yt, output_path):
@@ -52,8 +52,16 @@ def start_download():
     download_type = format_var.get()
     output_path = folder_entry.get().strip() or "."
 
+    YOUTUBE_URL_PATTERN = re.compile(
+        r'^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$'
+    )
+
     if not url:
         messagebox.showwarning("Input Error", "Please enter a YouTube URL.")
+        return
+
+    if not YOUTUBE_URL_PATTERN.match(url):
+        messagebox.showerror("Invalid URL", "The URL entered is not a valid YouTube link.")
         return
 
     def download_thread():
